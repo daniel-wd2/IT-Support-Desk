@@ -1,35 +1,47 @@
 <section class="page">
   <header class="hero">
-    <div>
+    <div class="hero-copy">
       <p class="eyebrow">Demo fullstack Angular + NestJS</p>
       <h1>IT Support Desk</h1>
       <p class="subtitle">
-        Aplicacion demo para gestionar incidencias tecnicas de forma sencilla.
+        Gestiona incidencias tecnicas con una interfaz clara, ligera y pensada para seguimiento rapido.
       </p>
     </div>
-    <a class="primary-button" routerLink="/tickets/new">Nueva incidencia</a>
+
+    <div class="hero-actions">
+      <div class="hero-note">
+        <span class="hero-note-label">Stack</span>
+        <strong>Angular, NestJS, PostgreSQL</strong>
+      </div>
+      <a class="primary-button" routerLink="/tickets/new">Nueva incidencia</a>
+    </div>
   </header>
 
   <div class="stats-grid" *ngIf="stats as summary">
     <article class="stat-card">
       <span>Total</span>
       <strong>{{ summary.total }}</strong>
+      <small>Incidencias registradas</small>
     </article>
     <article class="stat-card">
       <span>Abiertas</span>
       <strong>{{ summary.open }}</strong>
+      <small>Pendientes de resolver</small>
     </article>
     <article class="stat-card">
       <span>En proceso</span>
       <strong>{{ summary.inProgress }}</strong>
+      <small>Trabajo activo</small>
     </article>
     <article class="stat-card">
       <span>Resueltas</span>
       <strong>{{ summary.resolved }}</strong>
+      <small>Listas para cierre</small>
     </article>
     <article class="stat-card alert">
-      <span>Criticas</span>
+      <span>Críticas</span>
       <strong>{{ summary.critical }}</strong>
+      <small>Prioridad inmediata</small>
     </article>
   </div>
 
@@ -108,7 +120,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let ticket of tickets">
-            <td>#{{ ticket.id }}</td>
+            <td>
+              <span class="ticket-id">#{{ ticket.id }}</span>
+            </td>
             <td class="title-cell">
               <strong>{{ ticket.title }}</strong>
               <small>{{ ticket.description }}</small>

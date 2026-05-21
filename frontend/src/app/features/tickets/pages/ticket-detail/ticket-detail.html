@@ -3,7 +3,7 @@
 
   <section class="panel" *ngIf="ticket as currentTicket; else stateBlock">
     <header class="header">
-      <div>
+      <div class="header-copy">
         <p class="eyebrow">Incidencia #{{ currentTicket.id }}</p>
         <h1>{{ currentTicket.title }}</h1>
         <p class="description">{{ currentTicket.description }}</p>
@@ -20,31 +20,31 @@
     </header>
 
     <div class="details-grid">
-      <article>
+      <article class="detail-card">
         <span>Categoria</span>
         <strong>{{ currentTicket.category }}</strong>
       </article>
-      <article>
+      <article class="detail-card">
         <span>Prioridad</span>
         <strong class="badge" [ngClass]="badgeClass(currentTicket.priority)">
           {{ currentTicket.priority }}
         </strong>
       </article>
-      <article>
+      <article class="detail-card">
         <span>Estado</span>
         <strong class="badge" [ngClass]="badgeClass(currentTicket.status)">
           {{ currentTicket.status }}
         </strong>
       </article>
-      <article>
+      <article class="detail-card">
         <span>Asignado a</span>
         <strong>{{ currentTicket.assignedTo || 'Sin asignar' }}</strong>
       </article>
-      <article>
+      <article class="detail-card">
         <span>Creada</span>
         <strong>{{ currentTicket.createdAt | date: 'dd/MM/yyyy HH:mm' }}</strong>
       </article>
-      <article>
+      <article class="detail-card">
         <span>Actualizada</span>
         <strong>{{ currentTicket.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</strong>
       </article>
