@@ -2,10 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { QueryTicketsDto } from './dto/query-tickets.dto';
-import {
-  TicketPriority,
-  TicketStatus,
-} from './dto/ticket-options.constants';
+import { TicketPriority, TicketStatus } from './dto/ticket-options.constants';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 
 @Injectable()

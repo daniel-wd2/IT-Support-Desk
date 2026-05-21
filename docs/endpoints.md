@@ -12,7 +12,23 @@ Swagger:
 http://localhost:3000/api
 ```
 
-## 1. Listar incidencias
+## 1. Healthcheck
+
+```http
+GET /health
+```
+
+Respuesta esperada:
+
+```json
+{
+  "status": "ok",
+  "service": "it-support-desk-api",
+  "timestamp": "2026-05-22T00:00:00.000Z"
+}
+```
+
+## 2. Listar incidencias
 
 ```http
 GET /tickets
@@ -30,7 +46,7 @@ Ejemplo:
 GET /tickets?status=Abierta&priority=Alta
 ```
 
-## 2. Obtener detalle de una incidencia
+## 3. Obtener detalle de una incidencia
 
 ```http
 GET /tickets/:id
@@ -42,7 +58,7 @@ Ejemplo:
 GET /tickets/1
 ```
 
-## 3. Crear incidencia
+## 4. Crear incidencia
 
 ```http
 POST /tickets
@@ -62,7 +78,7 @@ Payload de ejemplo:
 }
 ```
 
-## 4. Editar incidencia
+## 5. Editar incidencia
 
 ```http
 PATCH /tickets/:id
@@ -78,7 +94,7 @@ Payload de ejemplo:
 }
 ```
 
-## 5. Eliminar incidencia
+## 6. Eliminar incidencia
 
 ```http
 DELETE /tickets/:id
@@ -90,7 +106,7 @@ Ejemplo:
 DELETE /tickets/3
 ```
 
-## 6. Resumen del dashboard
+## 7. Resumen del dashboard
 
 ```http
 GET /tickets/stats/summary

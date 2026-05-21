@@ -30,8 +30,8 @@ Construir una aplicacion pequena, funcional y facil de entender que permita demo
 - Alta de incidencias
 - Edicion de incidencias
 - Vista detalle
-- Cambio de estado
 - Eliminacion de incidencias
+- Endpoint de healthcheck
 - Seed inicial con datos ficticios
 
 ## Arquitectura basica
@@ -50,19 +50,19 @@ Estructura principal:
 
 ```text
 it-support-desk/
-├── frontend/
-├── backend/
-├── docker-compose.yml
-├── README.md
-└── docs/
-    ├── pruebas.md
-    ├── endpoints.md
-    └── capturas.md
+|-- frontend/
+|-- backend/
+|-- docker-compose.yml
+|-- README.md
+`-- docs/
+    |-- pruebas.md
+    |-- endpoints.md
+    `-- capturas.md
 ```
 
 ## Como ejecutar el proyecto
 
-1. Sitúate en la carpeta raiz del proyecto:
+1. Entra en la carpeta raiz:
 
 ```bash
 cd it-support-desk
@@ -91,6 +91,7 @@ docker compose up -d --build
 - Frontend: http://localhost:4200
 - Backend: http://localhost:3000
 - Swagger: http://localhost:3000/api
+- Health: http://localhost:3000/health
 - Adminer: http://localhost:8080
 
 ## Variables de entorno
@@ -109,6 +110,7 @@ Variables utiles para el backend fuera de Docker en [backend/.env.example](backe
 
 ## Endpoints principales
 
+- `GET /health`
 - `GET /tickets`
 - `GET /tickets/:id`
 - `POST /tickets`
@@ -130,7 +132,7 @@ El seed inicial crea incidencias de ejemplo como:
 
 ## Pruebas realizadas
 
-Se incluye una guia de pruebas manuales en [docs/pruebas.md](docs/pruebas.md), con comprobaciones de:
+Pruebas manuales:
 
 - arranque de contenedores
 - revision de servicios activos
@@ -138,6 +140,25 @@ Se incluye una guia de pruebas manuales en [docs/pruebas.md](docs/pruebas.md), c
 - creacion de incidencias
 - revision de logs
 - validacion visual del frontend
+- comprobacion del endpoint de healthcheck
+
+Pruebas automatizadas ejecutables:
+
+```bash
+cd backend && npm run test:ci && npm run test:e2e
+cd ../frontend && npm run test:ci
+```
+
+## Mejoras de mantenimiento aplicadas
+
+- el dashboard evita recargar el resumen en cada filtro
+- componentes Angular con `OnPush` y limpieza automatica de suscripciones
+- helper compartido para clases visuales de tickets
+- endpoint `GET /health` para comprobaciones operativas
+- healthchecks en `docker-compose.yml` para backend y frontend
+- arranque Docker del backend mas limpio con script dedicado
+- imagen runtime del backend mas pequena al instalar solo dependencias necesarias
+- tests basicos de backend y frontend
 
 ## Buenas practicas aplicadas
 
@@ -157,7 +178,7 @@ Se incluye una guia de pruebas manuales en [docs/pruebas.md](docs/pruebas.md), c
 - Adjuntar capturas o archivos
 - Notificaciones por email o Telegram
 - Historial de cambios
-- Tests automatizados mas amplios
+- Paginacion y busqueda
 - Despliegue en VPS con Docker
 
 ## Conclusion

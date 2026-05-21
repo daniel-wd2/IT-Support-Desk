@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 import {
   CATEGORY_OPTIONS,
   PRIORITY_OPTIONS,
@@ -14,10 +16,12 @@ import { TicketsService } from '../../../../core/services/tickets';
   selector: 'app-ticket-form',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './ticket-form.html',
-  styleUrl: './ticket-form.css'
+  styleUrl: './ticket-form.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketForm implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly ticketsService = inject(TicketsService);
@@ -51,27 +55,40 @@ export class TicketForm implements OnInit {
       return;
     }
 
-    this.ticketId = Number(idParam);
+    const ticketId = Number(idParam);
+
+    if (!Number.isInteger(ticketId) || ticketId <= 0) {
+      this.errorMessage = 'El identificador de la incidencia no es valido.';
+      return;
+    }
+
+    this.ticketId = ticketId;
     this.isEditMode = true;
     this.loading = true;
 
-    this.ticketsService.getTicket(this.ticketId).subscribe({
-      next: (ticket) => {
-        this.form.patchValue({
-          title: ticket.title,
-          description: ticket.description,
-          category: ticket.category,
-          priority: ticket.priority,
-          status: ticket.status,
-          assignedTo: ticket.assignedTo ?? ''
-        });
-        this.loading = false;
-      },
-      error: () => {
-        this.errorMessage = 'No se pudo cargar la incidencia para editarla.';
-        this.loading = false;
-      }
-    });
+    this.ticketsService
+      .getTicket(this.ticketId)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (ticket) => {
+          this.form.patchValue({
+            title: ticket.title,
+            description: ticket.description,
+            category: ticket.category,
+            priority: ticket.priority,
+            status: ticket.status,
+            assignedTo: ticket.assignedTo ?? ''
+          });
+        },
+        error: () => {
+          this.errorMessage = 'No se pudo cargar la incidencia para editarla.';
+        }
+      });
   }
 
   saveTicket() {
@@ -89,16 +106,21 @@ export class TicketForm implements OnInit {
         ? this.ticketsService.updateTicket(this.ticketId, payload)
         : this.ticketsService.createTicket(payload);
 
-    request.subscribe({
-      next: (ticket) => {
-        this.submitting = false;
-        this.router.navigate(['/tickets', ticket.id]);
-      },
-      error: () => {
-        this.errorMessage = 'No se pudo guardar la incidencia.';
-        this.submitting = false;
-      }
-    });
+    request
+      .pipe(
+        finalize(() => {
+          this.submitting = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (ticket) => {
+          this.router.navigate(['/tickets', ticket.id]);
+        },
+        error: () => {
+          this.errorMessage = 'No se pudo guardar la incidencia.';
+        }
+      });
   }
 
   fieldHasError(fieldName: keyof TicketPayload) {

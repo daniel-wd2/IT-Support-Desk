@@ -14,11 +14,13 @@ FROM node:22-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --omit=dev
 
-COPY . .
+COPY prisma ./prisma
+COPY scripts ./scripts
 COPY --from=builder /app/dist ./dist
 
+RUN sed -i 's/\r$//' ./scripts/start-docker.sh
 RUN npx prisma generate
 
 EXPOSE 3000
