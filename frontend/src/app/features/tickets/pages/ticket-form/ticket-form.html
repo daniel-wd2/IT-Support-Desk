@@ -1,0 +1,71 @@
+<section class="page">
+  <a class="back-link" routerLink="/">Volver al dashboard</a>
+
+  <section class="panel">
+    <header class="header">
+      <div>
+        <p class="eyebrow">{{ isEditMode ? 'Editar incidencia' : 'Nueva incidencia' }}</p>
+        <h1>{{ isEditMode ? 'Actualizar ticket IT' : 'Registrar ticket IT' }}</h1>
+        <p>
+          Completa la informacion principal de la incidencia con datos ficticios.
+        </p>
+      </div>
+    </header>
+
+    <p *ngIf="loading">Cargando incidencia...</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <form class="form-grid" [formGroup]="form" (ngSubmit)="saveTicket()" *ngIf="!loading">
+      <label class="full-width">
+        <span>Titulo</span>
+        <input formControlName="title" type="text" placeholder="Ej. No funciona el acceso a la VPN" />
+        <small *ngIf="fieldHasError('title')">El titulo debe tener entre 5 y 120 caracteres.</small>
+      </label>
+
+      <label class="full-width">
+        <span>Descripcion</span>
+        <textarea
+          formControlName="description"
+          rows="5"
+          placeholder="Describe el problema tecnico de forma breve y clara"
+        ></textarea>
+        <small *ngIf="fieldHasError('description')">
+          La descripcion debe tener entre 10 y 500 caracteres.
+        </small>
+      </label>
+
+      <label>
+        <span>Categoria</span>
+        <select formControlName="category">
+          <option *ngFor="let option of categoryOptions" [value]="option">{{ option }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Prioridad</span>
+        <select formControlName="priority">
+          <option *ngFor="let option of priorityOptions" [value]="option">{{ option }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Estado</span>
+        <select formControlName="status">
+          <option *ngFor="let option of statusOptions" [value]="option">{{ option }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Asignado a</span>
+        <input formControlName="assignedTo" type="text" placeholder="Ej. Daniel" />
+      </label>
+
+      <div class="form-actions full-width">
+        <a class="secondary-button" routerLink="/">Cancelar</a>
+        <button class="primary-button" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Guardando...' : (isEditMode ? 'Actualizar incidencia' : 'Crear incidencia') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</section>

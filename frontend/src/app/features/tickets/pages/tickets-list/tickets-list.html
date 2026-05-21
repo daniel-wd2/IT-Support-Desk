@@ -1,0 +1,150 @@
+<section class="page">
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Demo fullstack Angular + NestJS</p>
+      <h1>IT Support Desk</h1>
+      <p class="subtitle">
+        Aplicacion demo para gestionar incidencias tecnicas de forma sencilla.
+      </p>
+    </div>
+    <a class="primary-button" routerLink="/tickets/new">Nueva incidencia</a>
+  </header>
+
+  <div class="stats-grid" *ngIf="stats as summary">
+    <article class="stat-card">
+      <span>Total</span>
+      <strong>{{ summary.total }}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Abiertas</span>
+      <strong>{{ summary.open }}</strong>
+    </article>
+    <article class="stat-card">
+      <span>En proceso</span>
+      <strong>{{ summary.inProgress }}</strong>
+    </article>
+    <article class="stat-card">
+      <span>Resueltas</span>
+      <strong>{{ summary.resolved }}</strong>
+    </article>
+    <article class="stat-card alert">
+      <span>Criticas</span>
+      <strong>{{ summary.critical }}</strong>
+    </article>
+  </div>
+
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Filtros</h2>
+        <p>Filtra por estado, prioridad y categoria.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="filtersForm" class="filters-grid" (ngSubmit)="applyFilters()">
+      <label>
+        <span>Estado</span>
+        <select formControlName="status">
+          <option value="">Todos</option>
+          <option *ngFor="let option of statusOptions" [value]="option">
+            {{ option }}
+          </option>
+        </select>
+      </label>
+
+      <label>
+        <span>Prioridad</span>
+        <select formControlName="priority">
+          <option value="">Todas</option>
+          <option *ngFor="let option of priorityOptions" [value]="option">
+            {{ option }}
+          </option>
+        </select>
+      </label>
+
+      <label>
+        <span>Categoria</span>
+        <select formControlName="category">
+          <option value="">Todas</option>
+          <option *ngFor="let option of categoryOptions" [value]="option">
+            {{ option }}
+          </option>
+        </select>
+      </label>
+
+      <div class="filter-actions">
+        <button class="secondary-button" type="button" (click)="clearFilters()">
+          Limpiar
+        </button>
+        <button class="primary-button" type="submit">Aplicar</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Incidencias</h2>
+        <p>Listado principal para revisar el estado del soporte.</p>
+      </div>
+    </div>
+
+    <p class="feedback error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="feedback" *ngIf="loading">Cargando incidencias...</p>
+
+    <div class="table-wrapper" *ngIf="!loading">
+      <table *ngIf="tickets.length; else emptyState">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Titulo</th>
+            <th>Categoria</th>
+            <th>Prioridad</th>
+            <th>Estado</th>
+            <th>Asignado a</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ticket of tickets">
+            <td>#{{ ticket.id }}</td>
+            <td class="title-cell">
+              <strong>{{ ticket.title }}</strong>
+              <small>{{ ticket.description }}</small>
+            </td>
+            <td>{{ ticket.category }}</td>
+            <td>
+              <span class="badge" [ngClass]="badgeClass(ticket.priority)">
+                {{ ticket.priority }}
+              </span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="badgeClass(ticket.status)">
+                {{ ticket.status }}
+              </span>
+            </td>
+            <td>{{ ticket.assignedTo || 'Sin asignar' }}</td>
+            <td>{{ ticket.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="actions-cell">
+              <a class="link-button" [routerLink]="['/tickets', ticket.id]">Ver</a>
+              <a class="link-button" [routerLink]="['/tickets', ticket.id, 'edit']">
+                Editar
+              </a>
+              <button class="danger-button" type="button" (click)="deleteTicket(ticket)">
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <h3>No hay incidencias para estos filtros</h3>
+          <p>Prueba a limpiar filtros o crea una nueva incidencia.</p>
+        </div>
+      </ng-template>
+    </div>
+  </section>
+</section>

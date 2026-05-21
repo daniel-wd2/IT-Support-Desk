@@ -1,0 +1,60 @@
+<section class="page">
+  <a class="back-link" routerLink="/">Volver al dashboard</a>
+
+  <section class="panel" *ngIf="ticket as currentTicket; else stateBlock">
+    <header class="header">
+      <div>
+        <p class="eyebrow">Incidencia #{{ currentTicket.id }}</p>
+        <h1>{{ currentTicket.title }}</h1>
+        <p class="description">{{ currentTicket.description }}</p>
+      </div>
+
+      <div class="actions">
+        <a class="secondary-button" [routerLink]="['/tickets', currentTicket.id, 'edit']">
+          Editar
+        </a>
+        <button class="danger-button" type="button" (click)="deleteTicket()">
+          Eliminar
+        </button>
+      </div>
+    </header>
+
+    <div class="details-grid">
+      <article>
+        <span>Categoria</span>
+        <strong>{{ currentTicket.category }}</strong>
+      </article>
+      <article>
+        <span>Prioridad</span>
+        <strong class="badge" [ngClass]="badgeClass(currentTicket.priority)">
+          {{ currentTicket.priority }}
+        </strong>
+      </article>
+      <article>
+        <span>Estado</span>
+        <strong class="badge" [ngClass]="badgeClass(currentTicket.status)">
+          {{ currentTicket.status }}
+        </strong>
+      </article>
+      <article>
+        <span>Asignado a</span>
+        <strong>{{ currentTicket.assignedTo || 'Sin asignar' }}</strong>
+      </article>
+      <article>
+        <span>Creada</span>
+        <strong>{{ currentTicket.createdAt | date: 'dd/MM/yyyy HH:mm' }}</strong>
+      </article>
+      <article>
+        <span>Actualizada</span>
+        <strong>{{ currentTicket.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</strong>
+      </article>
+    </div>
+  </section>
+
+  <ng-template #stateBlock>
+    <section class="panel">
+      <p *ngIf="loading">Cargando detalle...</p>
+      <p class="error" *ngIf="!loading && errorMessage">{{ errorMessage }}</p>
+    </section>
+  </ng-template>
+</section>
