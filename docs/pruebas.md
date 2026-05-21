@@ -24,7 +24,19 @@ Resultado esperado:
 
 Aparecen los servicios `frontend-it-support`, `backend-it-support`, `postgres-it-support` y `adminer-it-support`.
 
-## Prueba 3: comprobar API
+## Prueba 3: comprobar healthcheck del backend
+
+Comando:
+
+```bash
+curl http://localhost:3000/health
+```
+
+Resultado esperado:
+
+Devuelve un JSON con `status: ok`.
+
+## Prueba 4: comprobar API
 
 Comando:
 
@@ -36,7 +48,7 @@ Resultado esperado:
 
 Devuelve un listado JSON de incidencias ficticias.
 
-## Prueba 4: crear incidencia
+## Prueba 5: crear incidencia
 
 Comando:
 
@@ -50,7 +62,7 @@ Resultado esperado:
 
 La API devuelve la incidencia creada con su `id`, `createdAt` y `updatedAt`.
 
-## Prueba 5: revisar logs del backend
+## Prueba 6: revisar logs del backend
 
 Comando:
 
@@ -62,7 +74,7 @@ Resultado esperado:
 
 Se ven las peticiones realizadas a la API y el arranque correcto del servidor NestJS.
 
-## Prueba 6: comprobar frontend
+## Prueba 7: comprobar frontend
 
 URL:
 
@@ -74,7 +86,7 @@ Resultado esperado:
 
 Se muestra el dashboard con tarjetas de resumen, filtros y listado de incidencias.
 
-## Prueba 7: comprobar Swagger
+## Prueba 8: comprobar Swagger
 
 URL:
 
@@ -86,7 +98,7 @@ Resultado esperado:
 
 Se abre la documentacion Swagger con los endpoints de tickets disponibles.
 
-## Prueba 8: comprobar Adminer
+## Prueba 9: comprobar Adminer
 
 URL:
 
@@ -97,3 +109,16 @@ http://localhost:8080
 Resultado esperado:
 
 Se abre Adminer y permite conectar a PostgreSQL con las credenciales definidas en `.env`.
+
+## Prueba 10: ejecutar tests automatizados
+
+Comandos:
+
+```bash
+cd backend && npm run test:ci && npm run test:e2e
+cd ../frontend && npm run test:ci
+```
+
+Resultado esperado:
+
+Todas las suites terminan en verde.

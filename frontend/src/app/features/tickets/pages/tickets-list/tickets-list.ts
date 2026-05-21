@@ -1,7 +1,10 @@
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import {
   CATEGORY_OPTIONS,
   PRIORITY_OPTIONS,
@@ -11,15 +14,18 @@ import {
   TicketStats
 } from '../../../../core/models/ticket.model';
 import { TicketsService } from '../../../../core/services/tickets';
+import { getBadgeClass } from '../../../../core/utils/ticket-ui';
 
 @Component({
   selector: 'app-tickets-list',
   imports: [CommonModule, ReactiveFormsModule, RouterLink, DatePipe, NgClass],
   templateUrl: './tickets-list.html',
-  styleUrl: './tickets-list.css'
+  styleUrl: './tickets-list.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketsList implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly ticketsService = inject(TicketsService);
 
   readonly categoryOptions = CATEGORY_OPTIONS;
@@ -38,39 +44,89 @@ export class TicketsList implements OnInit {
   errorMessage = '';
 
   ngOnInit() {
-    this.loadDashboard();
+    this.loadInitialData();
   }
 
-  loadDashboard() {
+  loadInitialData() {
     this.loading = true;
     this.errorMessage = '';
-    const filters = this.filtersForm.getRawValue() as TicketFilters;
 
-    this.ticketsService.getSummary().subscribe({
-      next: (stats) => {
-        this.stats = stats;
-      },
-      error: () => {
-        this.errorMessage =
-          'No se pudo cargar el resumen de incidencias. Revisa que el backend este activo.';
-      }
-    });
+    forkJoin({
+      stats: this.ticketsService.getSummary(),
+      tickets: this.ticketsService.getTickets(this.getFilters())
+    })
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: ({ stats, tickets }) => {
+          this.stats = stats;
+          this.tickets = tickets;
+        },
+        error: () => {
+          this.stats = null;
+          this.tickets = [];
+          this.errorMessage =
+            'No se pudo cargar el dashboard. Revisa que backend y base de datos esten activos.';
+        }
+      });
+  }
 
-    this.ticketsService.getTickets(filters).subscribe({
-      next: (tickets) => {
-        this.tickets = tickets;
-        this.loading = false;
-      },
-      error: () => {
-        this.errorMessage =
-          'No se pudo cargar el listado. Revisa la conexion con la API.';
-        this.loading = false;
-      }
-    });
+  loadTickets() {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.ticketsService
+      .getTickets(this.getFilters())
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (tickets) => {
+          this.tickets = tickets;
+        },
+        error: () => {
+          this.tickets = [];
+          this.errorMessage =
+            'No se pudo cargar el listado. Revisa la conexion con la API.';
+        }
+      });
+  }
+
+  refreshAfterMutation() {
+    this.loading = true;
+    this.errorMessage = '';
+
+    forkJoin({
+      stats: this.ticketsService.getSummary(),
+      tickets: this.ticketsService.getTickets(this.getFilters())
+    })
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: ({ stats, tickets }) => {
+          this.stats = stats;
+          this.tickets = tickets;
+        },
+        error: () => {
+          this.errorMessage =
+            'No se pudo refrescar el dashboard despues del cambio.';
+        }
+      });
   }
 
   applyFilters() {
-    this.loadDashboard();
+    this.loadTickets();
   }
 
   clearFilters() {
@@ -79,7 +135,7 @@ export class TicketsList implements OnInit {
       priority: '',
       category: ''
     });
-    this.loadDashboard();
+    this.loadTickets();
   }
 
   deleteTicket(ticket: Ticket) {
@@ -91,22 +147,28 @@ export class TicketsList implements OnInit {
       return;
     }
 
-    this.ticketsService.deleteTicket(ticket.id).subscribe({
-      next: () => {
-        this.loadDashboard();
-      },
-      error: () => {
-        this.errorMessage = 'No se pudo eliminar la incidencia.';
-      }
-    });
+    this.ticketsService
+      .deleteTicket(ticket.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.refreshAfterMutation();
+        },
+        error: () => {
+          this.errorMessage = 'No se pudo eliminar la incidencia.';
+        }
+      });
   }
 
   badgeClass(value: string) {
-    return value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z]+/g, '-')
-      .replace(/^-|-$/g, '');
+    return getBadgeClass(value);
+  }
+
+  trackByTicketId(_index: number, ticket: Ticket) {
+    return ticket.id;
+  }
+
+  private getFilters(): TicketFilters {
+    return this.filtersForm.getRawValue() as TicketFilters;
   }
 }

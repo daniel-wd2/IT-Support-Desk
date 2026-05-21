@@ -97,7 +97,7 @@ label span {
 }
 
 small {
-  color: #b91c1c;
+  color: #ffb4c1;
   font-weight: 500;
 }
 
@@ -147,7 +147,7 @@ small {
 }
 
 .error {
-  color: #b91c1c;
+  color: #ffb4c1;
 }
 
 @media (max-width: 768px) {
